@@ -1,0 +1,81 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script>
+        String.prototype.matchAll = function (regexp) {
+            var matches = [];
+            this.replace(regexp, function () {
+                var arr = ([]).slice.call(arguments, 0);
+                var extras = arr.splice(-2);
+                arr.index = extras[0];
+                arr.input = extras[1];
+                matches.push(arr);
+            });
+            return matches.length ? matches : null;
+        };
+        var whole = [];
+        var parsed;
+        var str;
+        var re;
+        var re_brackets;
+        var real;
+        var data;
+        $(document).ready(function () {
+            $.get("hello.txt", function (data) {
+                alert(data);
+                str = data;
+                re = /\s*?([\s\S]*?)(?:(\{\{[\s\S]*?\}\})|$)/g;
+                re_brackets = /{{([\s\S]*?)}}/g;
+                console.log(str.matchAll(re));
+                parsed = str.matchAll(re);
+                parsed.forEach(function (data) {
+                    console.log(data);
+                    if (data[1]) {
+                        real = data[1].replace(/^\s+/i,"");
+                        if (real) {
+                            whole.push({
+                                "content": real
+                                , "type": "text"
+                            });
+                        }
+                    }
+                    if (data[2]) {
+                        real = data[2].replace("{{", "").replace("}}", "");
+                        if (real) {
+                            whole.push({
+                                "content": real
+                                , "type": "script"
+                            });
+                        }
+                    }
+                });
+            });
+        });
+
+        function go() {
+            data = whole.shift();
+            if (data) {
+                if (data.type === "text") {
+                    console.log("대사");
+                    console.log(data.content);
+                }
+                else if (data.type === "script") {
+                    console.log("스크립트");
+                    console.log(data.content);
+                }
+            }
+            else {
+                console.log("NO MORE DATA error");
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <button onclick="go()"> go </button>
+</body>
+
+</html>
